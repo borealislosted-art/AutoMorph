@@ -1,0 +1,53 @@
+--[[--
+	Created by ProbabilityGuy (Roblox) / uncleansable (Discord).
+	I am the sole creator and holder of this script.
+	All rights reserved. Do not redistribute, resell or claim as your own.
+--]]--
+
+local Players = game:GetService("Players")
+local AutoMorphService = require(script.AutoMorphService)
+
+local function onCharacterAdded(player: Player, character: Model)
+	local hum = character:WaitForChild("Humanoid", 5)
+	if not hum then return end
+
+	AutoMorphService:ApplyTeamClothes(character, player.Team)
+
+	local teamConnection
+	local function cleanup()
+		if teamConnection then
+			teamConnection:Disconnect()
+			teamConnection = nil
+		end
+	end
+
+	teamConnection = player:GetPropertyChangedSignal("Team"):Connect(function()
+		if character.Parent then
+			AutoMorphService:ApplyTeamClothes(character, player.Team)
+		else
+			cleanup()
+		end
+	end)
+
+	hum.Died:Once(cleanup)
+	character.AncestryChanged:Once(function(_, parent)
+		if not parent then
+			cleanup()
+		end
+	end)
+end
+
+local function onPlayerAdded(player: Player)
+	player.CharacterAdded:Connect(function(character)
+		onCharacterAdded(player, character)
+	end)
+
+	if player.Character then
+		task.spawn(onCharacterAdded, player, player.Character)
+	end
+end
+
+for _, player in Players:GetPlayers() do
+	task.spawn(onPlayerAdded, player)
+end
+Players.PlayerAdded:Connect(onPlayerAdded)
