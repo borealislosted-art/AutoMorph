@@ -5,7 +5,7 @@
 --]]--
 
 local Players = game:GetService("Players")
-local AutoMorphService = require(script.AutoMorphService)
+local AutoMorphService = require(script.Parent.Module.AutoMorphService)
 
 local function onCharacterAdded(player: Player, character: Model)
 	local hum = character:WaitForChild("Humanoid", 5)
